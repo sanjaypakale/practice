@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-    name: a-python-backend-library
+    name: a-openapi-spec
     description: A Python Library
     annotations:
         backstage.io/techdocs-ref: dir:.
@@ -19,4 +19,4 @@ spec:
     owner: sanjaypakale
     system: project-ddp
     defination:
-      $text: sample.json
+      $text: https://github.com/sanjaypakale/practice/blob/master/sample.json
