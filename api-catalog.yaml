@@ -1,5 +1,5 @@
 apiVersion: backstage.io/v1alpha1
-kind: location
+kind: Component
 metadata:
     name: a-python-backend-library
     description: A Python Library
