@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-    name: a-python-library
+    name: a-java-library
     description: A Python Library
     annotations:
         backstage.io/techdocs-ref: dir:.
