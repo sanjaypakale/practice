@@ -18,6 +18,8 @@ spec:
     lifecycle: production
     owner: idpadmins
     system: project-x
+    targets:
+      - sample.json
 
 ---
 apiVersion: backstage.io/v1alpha1
