@@ -46,3 +46,43 @@ spec:
           is: 
             - backend
             - fullstack
+  steps:
+    - id: fetch-repository
+      name: Fetch Repository Template
+      action: fetch:template
+      input:
+        url: https://github.com/my-org/my-repo-template
+        targetPath: ./template
+        values:
+          appType: ${{ parameters.applicationType }}
+          frontendFramework: ${{ parameters.frontendFramework }}
+          backendFramework: ${{ parameters.backendFramework }}
+    - id: create-repo
+      name: Create GitHub Repository
+      action: github:repo:create
+      input:
+        owner: my-org
+        repo: ${{ parameters.applicationType }}-app
+    - id: publish-code
+      name: Publish Source Code to Repository
+      action: publish:github
+      input:
+        repoUrl: ${{ steps.create-repo.output.repoUrl }}
+        repoContents: ./template
+    - id: setup-jenkins
+      name: Setup Jenkins Multistage Build Job
+      action: jenkins:job:trigger
+      input:
+        jobName: CI_PORTAL/create_multibranch_job
+        parameters:
+          repoUrl: ${{ steps.create-repo.output.repoUrl }}
+    - id: setup-sonar
+      name: Setup SonarQube Project
+      action: sonarqube:project:create
+      input:
+        projectName: ${{ parameters.applicationType }}-project
+        permissions:
+          - group: developers
+            permission: read
+          - group: admins
+            permission: write
