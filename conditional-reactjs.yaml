@@ -1,0 +1,48 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: conditional-ui-example
+  title: Conditional UI Example
+  description: A template demonstrating conditional UI elements.
+spec:
+  owner: user:guest
+  type: service
+  parameters:
+    - title: Application Type
+      description: Choose the type of application to create
+      type: string
+      required: true
+      enum:
+        - frontend
+        - backend
+        - fullstack
+      ui:
+        field: select
+    - title: Frontend Framework
+      description: Select a frontend framework (Visible only if Application Type is 'frontend' or 'fullstack')
+      type: string
+      enum:
+        - React
+        - Angular
+        - Vue
+      required: false
+      ui:
+        conditional:
+          when: applicationType
+          is: 
+            - frontend
+            - fullstack
+    - title: Backend Framework
+      description: Select a backend framework (Visible only if Application Type is 'backend' or 'fullstack')
+      type: string
+      enum:
+        - Spring Boot
+        - Node.js
+        - Django
+      required: false
+      ui:
+        conditional:
+          when: applicationType
+          is: 
+            - backend
+            - fullstack
