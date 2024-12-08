@@ -4,7 +4,7 @@ kind: Template
 metadata:
   name: reactjs-template
   title: Example Reactjs Template
-  description: A template to create a ReactJS project. Built on Node.js 20, it includes Material-UI, a build pipeline, SIT deployment job, and Aldon job configuration. Pipeline parameters can be customized as needed.
+  description: A template to create a ReactJS project. Built on Node.js 20, it includes Material-UI, a build pipeline, SIT deployment job, and Aldon job configuration. Pipeline parameters can be customized as needed. It has the integration with SonarQube, Artifactory & security scan veracode.
 spec:
   owner: user:guest
   type: service
