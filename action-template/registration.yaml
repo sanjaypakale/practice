@@ -1,8 +1,8 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: v1beta3-demo
-  title: Test Action template
+  name: registration-form
+  title: registration form
   description: scaffolder v1beta3 template demo
 spec:
   owner: backstage/techdocs-core
