@@ -1,0 +1,54 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: dynamic-project-slug-template
+  title: Create a Project with Dynamic Project Slug
+  description: A template to create a project by fetching options for project slug dynamically and publishing it to GitHub.
+spec:
+  owner: team
+  type: service
+  parameters:
+    - title: Project Details
+      required:
+        - projectSlug
+        - repoName
+      properties:
+        projectSlug:
+          title: Project Slug
+          type: string
+          description: Select the project slug from the list.
+          'ui:field': AsyncApiSelect # This uses an async field to fetch options dynamically
+          'ui:options':
+            url: 'https://api.example.com/project-slugs' # Replace with your API endpoint
+            method: 'GET'
+            optionsKey: 'name' # Key from API response for dropdown options
+        repoName:
+          title: Repository Name
+          type: string
+          description: Name of the repository to be created in GitHub.
+  steps:
+    - id: fetch-template
+      name: Fetch Template from GitHub
+      action: fetch:plain
+      input:
+        url: 'https://github.com/orgname/template-repo/archive/main.zip' # Replace with the GitHub template URL
+        targetPath: './template' # Path to place the fetched template
+    - id: publish-github
+      name: Publish Content to GitHub
+      action: publish:github
+      input:
+        repoUrl: 'https://github.com/orgname/{{ parameters.repoName }}'
+        repoVisibility: public
+        sourcePath: './template' # Publish content from fetched template
+        description: 'Repository for {{ parameters.projectSlug }}'
+    - id: register-catalog
+      name: Register Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: '{{ steps.publish-github.output.repoUrl }}/blob/main/catalog-info.yaml'
+  output:
+    links:
+      - title: Repository
+        url: '{{ steps.publish-github.output.repoUrl }}'
+      - title: Catalog
+        url: '{{ steps.register-catalog.output.catalogInfoUrl }}'
