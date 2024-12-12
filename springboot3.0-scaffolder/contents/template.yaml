@@ -24,7 +24,7 @@ spec:
           type: string
           enum:
             - project-a
-            - project-b
+            - sanjaypakale
             - project-c
           description: Select the project slug.
         repoName:
