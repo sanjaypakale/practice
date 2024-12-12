@@ -1,0 +1,42 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: v1beta3-demo
+  title: Test Action template
+  description: scaffolder v1beta3 template demo
+spec:
+  owner: backstage/techdocs-core
+  type: service
+
+  parameters:
+    - title: A registration form
+      description: A simple form example.
+      type: object
+      required:
+        - firstName
+        - lastName
+      properties:
+        firstName:
+          type: string
+          title: First name
+          default: Chuck
+          ui:autofocus: true
+          ui:emptyValue: ''
+          ui:autocomplete: given-name
+        lastName:
+          type: string
+          title: Last name
+          ui:emptyValue: ''
+          ui:autocomplete: family-name
+        nicknames:
+          type: array
+          items:
+            type: string
+          ui:options:
+            orderable: false
+        telephone:
+          type: string
+          title: Telephone
+          minLength: 10
+          ui:options:
+            inputType: tel
