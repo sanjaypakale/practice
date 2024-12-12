@@ -13,12 +13,12 @@ spec:
   parameters:
     - title: Fill in some steps
       required:
-        - name
+        - appcode
       properties:
-        name:
-          title: Name
+        appcode:
+          title: AppCodes
           type: string
-          description: Unique name of the component
+          description: Select App Code
           ui:field: appcodelist
           ui:autofocus: true
           ui:options:
