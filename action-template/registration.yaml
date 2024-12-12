@@ -40,3 +40,12 @@ spec:
           minLength: 10
           ui:options:
             inputType: tel
+  steps:
+    # Each step executes an action, in this case one templates files into the working directory.
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./contents
+        values:
+          name: ${{ parameters.name }}
