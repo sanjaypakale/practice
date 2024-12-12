@@ -1,1 +1,10 @@
-#test
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: practice
+  annotations:
+    github.com/project-slug: sanjaypakale/practice
+spec:
+  type: other
+  lifecycle: unknown
+  owner: guests
