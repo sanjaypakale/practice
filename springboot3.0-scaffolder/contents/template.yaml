@@ -1,9 +1,9 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: reactjs-template
-  title: Create ReactJS Template
-  description: This template creates a ReactJS project, publishes it to GitHub, registers it in the catalog, creates a Jenkins build job, and sets up Artifactory and SonarQube.
+  name: springboot30
+  title: Create SPRINGBOOT Template
+  description: This template creates a SPRINGBOOT project, publishes it to GitHub, registers it in the catalog, creates a Jenkins build job, and sets up Artifactory and SonarQube.
 spec:
   owner: team
   type: service
