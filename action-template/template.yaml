@@ -33,6 +33,11 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+        name:
+          title: Name
+          type: string
+          description: My custom name for the component
+          ui:field: ValidateKebabCase
 
   # here's the steps that are executed in series in the scaffolder backend
   steps:
