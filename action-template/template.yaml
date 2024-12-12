@@ -19,7 +19,7 @@ spec:
           title: Name
           type: string
           description: Unique name of the component
-          ui:field: ValidateKebabCase
+          ui:field: appcodelist
           ui:autofocus: true
           ui:options:
             rows: 5
