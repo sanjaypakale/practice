@@ -1,42 +1,52 @@
 import React from 'react';
-import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
-import {
-  createScaffolderLayout,
-  LayoutTemplate,
-} from '@backstage/plugin-scaffolder-react';
-import { Grid } from '@material-ui/core';
+import { FieldExtensionComponentProps } from '@backstage/plugin-scaffolder-react';
+import { FieldValidation } from '@rjsf/utils';
+import TextField from '@material-ui/core/TextField';
 
-const TwoColumn: LayoutTemplate = ({ properties, description, title }) => {
-  const leftProps = properties.filter(prop => prop.content.props.side === 'left');
-  const rightProps = properties.filter(prop => prop.content.props.side === 'right');
+/*
+  This is the actual component that will get rendered in the form
+*/
+export const OutlinedTextField = ({
+  onChange,
+  rawErrors,
+  required,
+  formData,
+  fieldProps,
+}: FieldExtensionComponentProps<string>) => {
+  const { title, pattern } = fieldProps; // Extract title and pattern from fieldProps
+
+  // Regex validation for the field
+  const isValidPattern = pattern ? new RegExp(pattern).test(formData) : true;
+
+  const hasError = rawErrors?.length > 0 || !isValidPattern;
+  const errorMessage = hasError
+    ? `Invalid format, must match pattern: ${pattern}`
+    : '';
 
   return (
-    <>
-      <h1>{title}</h1>
-      <h2>In two-column layout!</h2>
-      <Grid container spacing={3}>
-        {/* Left side parameters */}
-        <Grid item xs={6}>
-          {leftProps.map(prop => (
-            <div key={prop.content.key}>{prop.content}</div>
-          ))}
-        </Grid>
-
-        {/* Right side parameters */}
-        <Grid item xs={6}>
-          {rightProps.map(prop => (
-            <div key={prop.content.key}>{prop.content}</div>
-          ))}
-        </Grid>
-      </Grid>
-      <div>{description}</div>
-    </>
+    <TextField
+      label={title} // Set the label from the title property
+      variant="outlined"
+      required={required}
+      error={hasError}
+      helperText={hasError ? errorMessage : ' '}
+      value={formData || ''}
+      onChange={e => onChange(e.target.value)}
+      fullWidth
+    />
   );
 };
 
-export const TwoColumnLayout = scaffolderPlugin.provide(
-  createScaffolderLayout({
-    name: 'TwoColumn',
-    component: TwoColumn,
-  }),
-);
+/*
+  This is a validation function that will run when the form is submitted.
+  It ensures that the value matches the provided pattern in the YAML.
+*/
+export const validatePatternValidation = (
+  value: string,
+  validation: FieldValidation,
+  pattern: string,
+) => {
+  if (pattern && !new RegExp(pattern).test(value)) {
+    validation.addError(`Value must match pattern: ${pattern}`);
+  }
+};
