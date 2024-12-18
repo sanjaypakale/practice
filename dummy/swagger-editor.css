@@ -1,0 +1,21 @@
+.swagger-editor-container {
+  height: 100vh; /* Ensure the container takes full viewport height */
+  overflow: hidden; /* Avoid double scrolling at the container level */
+  box-sizing: border-box;
+}
+
+.swagger-ui .swagger-ui {
+  height: 100%; /* Ensure Swagger Editor uses the full container height */
+  display: flex;
+  flex-direction: column;
+}
+
+.swagger-ui .swagger-ui .swagger-container {
+  flex: 1;
+  overflow: hidden; /* Prevent scrolling on the parent container */
+}
+
+.swagger-ui .swagger-ui .swagger-ui-content {
+  height: 100%;
+  overflow: auto; /* Enable scrolling in the right pane */
+}
