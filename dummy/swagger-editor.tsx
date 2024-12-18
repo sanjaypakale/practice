@@ -1,50 +1,42 @@
-import React, { useEffect, useRef } from 'react';
-import SwaggerEditorBundle from 'swagger-editor/dist/swagger-editor-bundle';
-import 'swagger-editor/dist/swagger-editor.css';
+import React from 'react';
+import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import {
+  createScaffolderLayout,
+  LayoutTemplate,
+} from '@backstage/plugin-scaffolder-react';
+import { Grid } from '@material-ui/core';
 
-export const SwaggerEditorField = ({ onChange, rawErrors, rawData }) => {
-  const editorContainerRef = useRef(null);
-  const editorRef = useRef(null);
-
-  useEffect(() => {
-    // Initialize SwaggerEditorBundle on the container
-    editorRef.current = SwaggerEditorBundle({
-      dom_id: '#swagger-editor',
-      layout: 'StandaloneLayout',
-    });
-
-    // Load the initial spec if provided
-    if (rawData) {
-      editorRef.current.specActions.updateSpec(rawData);
-    }
-
-    // Subscribe to changes
-    const handleSpecChange = () => {
-      const spec = editorRef.current.getState().toJS().spec; // Get current spec
-      onChange(spec); // Trigger the onChange callback
-    };
-
-    // Listen for editor changes
-    editorRef.current.getStore().subscribe(handleSpecChange);
-
-    // Cleanup when unmounting
-    return () => {
-      editorRef.current.getStore().unsubscribe(handleSpecChange);
-    };
-  }, [onChange, rawData]);
+const TwoColumn: LayoutTemplate = ({ properties, description, title }) => {
+  const leftProps = properties.filter(prop => prop.content.props.side === 'left');
+  const rightProps = properties.filter(prop => prop.content.props.side === 'right');
 
   return (
-    <div>
-      <div
-        id="swagger-editor"
-        ref={editorContainerRef}
-        style={{
-          border: rawErrors ? '1px solid red' : '1px solid #ccc',
-          height: '500px',
-          width: '100%',
-        }}
-      />
-      {rawErrors && <p style={{ color: 'red' }}>Invalid OpenAPI Specification</p>}
-    </div>
+    <>
+      <h1>{title}</h1>
+      <h2>In two-column layout!</h2>
+      <Grid container spacing={3}>
+        {/* Left side parameters */}
+        <Grid item xs={6}>
+          {leftProps.map(prop => (
+            <div key={prop.content.key}>{prop.content}</div>
+          ))}
+        </Grid>
+
+        {/* Right side parameters */}
+        <Grid item xs={6}>
+          {rightProps.map(prop => (
+            <div key={prop.content.key}>{prop.content}</div>
+          ))}
+        </Grid>
+      </Grid>
+      <div>{description}</div>
+    </>
   );
 };
+
+export const TwoColumnLayout = scaffolderPlugin.provide(
+  createScaffolderLayout({
+    name: 'TwoColumn',
+    component: TwoColumn,
+  }),
+);
