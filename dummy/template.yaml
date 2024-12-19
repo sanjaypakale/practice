@@ -1,0 +1,87 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: generate-json-object
+  title: Generate JSON Object
+  description: A template to create a JSON object with user-provided inputs.
+spec:
+  owner: team@example.com
+  type: service
+  parameters:
+    - title: Input Parameters
+      properties:
+        parentVersion:
+          type: string
+          title: Parent Version
+          default: "2.9.0"
+        basePackage:
+          type: string
+          title: Base Package
+          default: "com.uobnet.mscodegen"
+        configPackage:
+          type: string
+          title: Config Package
+          default: "com.uobnet.mscodegen"
+        apiPackage:
+          type: string
+          title: API Package
+          default: "test apiPackage"
+        modelPackage:
+          type: string
+          title: Model Package
+          default: "FD"
+        processingPackage:
+          type: string
+          title: Processing Package
+          default: "processingPackage"
+        artifactDescription:
+          type: string
+          title: Artifact Description
+          default: "test artifactory"
+        artifactId:
+          type: string
+          title: Artifact ID
+          default: "artifactoryId"
+        groupId:
+          type: string
+          title: Group ID
+          default: "com.uobnet.mscodegen"
+        developerName:
+          type: string
+          title: Developer Name
+          default: "tabe312"
+        parentGroupId:
+          type: string
+          title: Parent Group ID
+          default: "com.uobnet.mscodegen"
+        parentArtifactId:
+          type: string
+          title: Parent Artifact ID
+          default: "com.uobnet.parentId"
+  steps:
+    - id: generate-json
+      name: Generate JSON Object
+      action: backstage:debug:log
+      input:
+        message: >
+          {{
+            dump({
+              "options": {
+                "parentVersion": parameters.parentVersion,
+                "basePackage": parameters.basePackage,
+                "configPackage": parameters.configPackage,
+                "apiPackage": parameters.apiPackage,
+                "modelPackage": parameters.modelPackage,
+                "processingPackage": parameters.processingPackage,
+                "artifactDescription": parameters.artifactDescription,
+                "artifactId": parameters.artifactId,
+                "groupId": parameters.groupId,
+                "developerName": parameters.developerName,
+                "parentGroupId": parameters.parentGroupId,
+                "parentArtifactId": parameters.parentArtifactId
+              },
+              "spec": {
+                "apiSpec": "Provide your API spec here"
+              }
+            })
+          }}
