@@ -1,0 +1,49 @@
+apiVersion: backstage.io/v1beta3
+kind: Template
+metadata:
+  name: openapi-service-template
+  title: OpenAPI Service Generator
+  description: Template for generating services from OpenAPI specifications.
+spec:
+  steps:
+    - id: fetch-openapi-spec
+      name: Fetch OpenAPI Spec
+      action: fetch:plain
+      input:
+        url: '{{openApiSpecUrl}}'
+        targetPath: './openapi-spec.yaml'
+
+    - id: generate-code
+      name: Generate Code
+      action: execute:command
+      input:
+        command: openapi-generator-cli generate -i ./openapi-spec.yaml -g java -o generated-code
+
+    - id: create-catalog
+      name: Add Catalog Info
+      action: fs:write
+      input:
+        targetPath: ./generated-code/catalog-info.yaml
+        content: |
+          apiVersion: backstage.io/v1alpha1
+          kind: Component
+          metadata:
+            name: {{parameters.serviceName}}
+            description: This service is generated using the OpenAPI spec.
+            annotations:
+              github.com/project-slug: {{parameters.repository}}
+          spec:
+            type: service
+            owner: {{parameters.owner}}
+            lifecycle: experimental
+
+    - id: publish-to-github
+      name: Commit and Push to GitHub
+      action: publish:github
+      input:
+        repoUrl: {{parameters.repository}}
+        branch: main
+        defaultBranch: main
+        files:
+          - ./generated-code/**
+        commitMessage: "Scaffolded service {{parameters.serviceName}} using OpenAPI generator."
