@@ -26,9 +26,29 @@ const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    // Restore repositories and showSourceBranch based on formData
+    if (formData.projectKey) {
+      const fetchRepositories = async () => {
+        try {
+          const response = await fetch(`/bitbucket-api/projects/${formData.projectKey}/repos`);
+          const data = await response.json();
+          setRepositories(data.map((repo: any) => repo.name));
+        } catch (error) {
+          console.error('Failed to fetch repositories:', error);
+          setRepositories([]);
+        }
+      };
+
+      fetchRepositories();
+    }
+
+    setShowSourceBranch(repositories.includes(formData.repoName || ""));
+  }, [formData.projectKey, formData.repoName, repositories]);
+
   const handleProjectKeyChange = async (projectKey: string | null) => {
     if (projectKey) {
-      onChange({ ...formData, projectKey });
+      onChange({ ...formData, projectKey, repoName: null, sourceBranch: null });
 
       // Fetch repositories for the selected projectKey
       try {
@@ -41,17 +61,17 @@ const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
         setRepositories([]);
       }
     } else {
-      onChange({ ...formData, projectKey: null, repository: null });
+      onChange({ ...formData, projectKey: null, repoName: null, sourceBranch: null });
       setRepositories([]);
     }
   };
 
-  const handleRepositoryChange = (repository: string | null) => {
-    if (repository) {
-      onChange({ ...formData, repository });
-      setShowSourceBranch(repositories.includes(repository));
+  const handleRepositoryChange = (repoName: string | null) => {
+    if (repoName) {
+      onChange({ ...formData, repoName });
+      setShowSourceBranch(repositories.includes(repoName));
     } else {
-      onChange({ ...formData, repository: null });
+      onChange({ ...formData, repoName: null, sourceBranch: null });
       setShowSourceBranch(false);
     }
   };
@@ -61,11 +81,11 @@ const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
   };
 
   const isProjectKeyValid = !!formData.projectKey;
-  const isRepositoryValid = !!formData.repository && validateRepository(formData.repository);
+  const isRepositoryValid = !!formData.repoName && validateRepository(formData.repoName);
   const isSourceBranchValid = showSourceBranch ? !!formData.sourceBranch : true;
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {/* Project Key Field */}
       <Autocomplete
         options={projects}
@@ -86,7 +106,7 @@ const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
       {repositories.length > 0 && (
         <Autocomplete
           options={repositories}
-          value={formData.repository || ""}
+          value={formData.repoName || ""}
           onChange={(event, value) => handleRepositoryChange(value)}
           renderInput={(params) => (
             <TextField
@@ -96,7 +116,7 @@ const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
               error={!isRepositoryValid}
               helperText={
                 !isRepositoryValid
-                  ? formData.repository
+                  ? formData.repoName
                     ? "Invalid repository name"
                     : "Repository is required"
                   : rawErrors?.repository?.[0]
