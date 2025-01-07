@@ -4,7 +4,7 @@ import {
 } from '@backstage/plugin-scaffolder-react';
 import { Autocomplete, TextField, Box } from '@mui/material';
 
-const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
+const BitbucketFieldExtension = (props: FieldExtensionComponentProps) => {
   const { onChange, rawErrors, formData } = props;
 
   const [projects, setProjects] = useState<string[]>([]);
@@ -27,42 +27,31 @@ const BitbucketFieldExtension = (props: FieldExtensionComponentProps<any>) => {
   }, []);
 
   useEffect(() => {
-    // Restore repositories and showSourceBranch based on formData
     if (formData.projectKey) {
-      const fetchRepositories = async () => {
-        try {
-          const response = await fetch(`/bitbucket-api/projects/${formData.projectKey}/repos`);
-          const data = await response.json();
-          setRepositories(data.map((repo: any) => repo.name));
-        } catch (error) {
-          console.error('Failed to fetch repositories:', error);
-          setRepositories([]);
-        }
-      };
-
-      fetchRepositories();
+      fetchRepositories(formData.projectKey);
     }
+  }, [formData.projectKey]);
 
-    setShowSourceBranch(repositories.includes(formData.repoName || ""));
-  }, [formData.projectKey, formData.repoName, repositories]);
+  const fetchRepositories = async (projectKey: string) => {
+    try {
+      const response = await fetch(`/bitbucket-api/projects/${projectKey}/repos`); // Replace with actual API endpoint
+      const data = await response.json();
+      setRepositories(data.map((repo: any) => repo.name));
+      setShowSourceBranch(data.some((repo: any) => repo.name === formData.repoName));
+    } catch (error) {
+      console.error('Failed to fetch repositories:', error);
+      setRepositories([]);
+    }
+  };
 
-  const handleProjectKeyChange = async (projectKey: string | null) => {
+  const handleProjectKeyChange = (projectKey: string | null) => {
     if (projectKey) {
       onChange({ ...formData, projectKey, repoName: null, sourceBranch: null });
-
-      // Fetch repositories for the selected projectKey
-      try {
-        const response = await fetch(`/bitbucket-api/projects/${projectKey}/repos`); // Replace with actual API endpoint
-        const data = await response.json();
-        setRepositories(data.map((repo: any) => repo.name));
-        setShowSourceBranch(false);
-      } catch (error) {
-        console.error('Failed to fetch repositories:', error);
-        setRepositories([]);
-      }
+      fetchRepositories(projectKey);
     } else {
       onChange({ ...formData, projectKey: null, repoName: null, sourceBranch: null });
       setRepositories([]);
+      setShowSourceBranch(false);
     }
   };
 
