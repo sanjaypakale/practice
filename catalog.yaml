@@ -16,7 +16,7 @@ metadata:
 spec:
     type: service
     lifecycle: production
-    owner: idpadmins
+    owner: sanjaypakale, harshapakale, tmp3vd, i706089, M12345x
     system: project-x
     targets:
       - sample.json
