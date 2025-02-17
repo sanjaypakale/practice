@@ -1,11 +1,10 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
+import java.util.Base64;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.util.Base64;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
 public class BitbucketRepoAnalyzer {
     private static final String BITBUCKET_API_URL = "https://api.bitbucket.org/2.0/repositories/";
@@ -139,27 +138,15 @@ public class BitbucketRepoAnalyzer {
 
     private static String sendGetRequest(String urlString) {
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
             String auth = USERNAME + ":" + APP_PASSWORD;
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-            conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
+            headers.set("Authorization", "Basic " + encodedAuth);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-                System.out.println("Failed to fetch data for URL: " + urlString);
-                return null;
-            }
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-            return response.toString();
+            ResponseEntity<String> response = restTemplate.exchange(urlString, HttpMethod.GET, entity, String.class);
+            return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
