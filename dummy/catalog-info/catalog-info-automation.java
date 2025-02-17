@@ -17,6 +17,8 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
 
     // Base directory where properties files reside.
     private static final String BASE_DIRECTORY = "/propertis";
+    // Output directory where catalog-info.yaml files will be generated.
+    private static final String OUTPUT_BASE_DIRECTORY = "c/Projects/development-Hybrid/catalog-registry";
 
     public static void main(String[] args) {
         SpringApplication.run(CatalogInfoGeneratorApplication.class, args);
@@ -24,7 +26,7 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // A set to track processed BITBUCKET_REPO_URLs so we don’t create duplicate catalog files.
+        // To avoid duplicate catalog generation for the same BITBUCKET_REPO_URL
         Set<String> processedRepoUrls = new HashSet<>();
 
         File baseDir = new File(BASE_DIRECTORY);
@@ -33,16 +35,18 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
             return;
         }
 
-        // Loop over each <appCode> folder under /propertis
+        // Loop over each <appCode> directory under /propertis
         File[] appCodeDirs = baseDir.listFiles(File::isDirectory);
         if (appCodeDirs == null) {
-            System.err.println("No appCode directories found.");
+            System.err.println("No appCode directories found under " + BASE_DIRECTORY);
             return;
         }
 
         for (File appCodeDir : appCodeDirs) {
+            // The folder name itself is the appCode
             String appCode = appCodeDir.getName();
-            // List all files starting with "ci_" and ending with ".properties", ignoring those with "_aldon_has.properties"
+            // List all properties files starting with "ci_" and ending with ".properties"
+            // and ignore files containing "_aldon_has.properties"
             File[] propFiles = appCodeDir.listFiles((dir, name) ->
                     name.startsWith("ci_") && name.endsWith(".properties") && !name.contains("_aldon_has.properties")
             );
@@ -52,7 +56,6 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
             }
 
             for (File propFile : propFiles) {
-                // Load properties file
                 Properties properties = new Properties();
                 try (InputStream input = new FileInputStream(propFile)) {
                     properties.load(input);
@@ -61,62 +64,60 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
                     continue;
                 }
 
-                // Read required properties
+                // Retrieve required properties
                 String bitbucketRepoUrl = properties.getProperty("BITBUCKET_REPO_URL");
                 String bitbucketRepoName = properties.getProperty("BITBUCKET_REPO_NAME");
                 String fileAppCode = properties.getProperty("APP_CODE");
 
                 if (bitbucketRepoUrl == null || bitbucketRepoName == null || fileAppCode == null) {
-                    System.err.println("Missing required properties in file: " + propFile.getAbsolutePath());
+                    System.err.println("Missing required properties in " + propFile.getAbsolutePath());
                     continue;
                 }
 
-                // Check if we already processed this repo URL
+                // Avoid generating duplicate catalog-info.yaml if the same BITBUCKET_REPO_URL is encountered
                 if (processedRepoUrls.contains(bitbucketRepoUrl)) {
                     System.out.println("Catalog already generated for repo: " + bitbucketRepoUrl);
                     continue;
                 }
 
-                // Fetch the Jenkinsfile from Bitbucket via an API call.
-                // (This example assumes that you can get the Jenkinsfile from a URL like this.
-                // Adjust as necessary for your Bitbucket configuration.)
+                // Fetch the Jenkinsfile via Bitbucket API call.
                 String jenkinsFileContent = fetchJenkinsfile(bitbucketRepoUrl);
-                if (jenkinsFileContent == null || !jenkinsFileContent.contains("@Library")) {
+                if (jenkinsFileContent == null || 
+                    !jenkinsFileContent.contains("@Library") ||
+                    !jenkinsFileContent.contains("genericMerged(")) {
                     System.err.println("Invalid or missing Jenkinsfile for repo: " + bitbucketRepoUrl);
                     continue;
                 }
 
-                // Optionally, you could parse the Jenkinsfile to verify that it contains:
-                //   @Library(['devops_automation', 'devops_utils'])
-                //   genericMerged([PropertyFolderName: <appCode>, PropertyFileName: "ci_<modulename>"])
-                // For this example we assume the check above is sufficient.
-
-                // Generate the catalog-info.yaml content.
+                // Generate the catalog-info.yaml content using BITBUCKET_REPO_NAME
                 String catalogYaml = generateCatalogYaml(bitbucketRepoName);
 
-                // Prepare the output folder: <APP_CODE>
-                File outputDir = new File(fileAppCode);
-                if (!outputDir.exists()) {
-                    outputDir.mkdirs();
+                // Create the output folder structure: OUTPUT_BASE_DIRECTORY/<APP_CODE>
+                File outputDir = new File(OUTPUT_BASE_DIRECTORY + File.separator + fileAppCode);
+                if (!outputDir.exists() && !outputDir.mkdirs()) {
+                    System.err.println("Could not create output directory: " + outputDir.getAbsolutePath());
+                    continue;
                 }
-                // Write the file as: <APP_CODE>/<BITBUCKET_REPO_NAME>_catalog-info.yaml
+
+                // The catalog file name: <BITBUCKET_REPO_NAME>_catalog-info.yaml
                 File outputFile = new File(outputDir, bitbucketRepoName + "_catalog-info.yaml");
                 try (FileWriter writer = new FileWriter(outputFile)) {
                     writer.write(catalogYaml);
-                    System.out.println("Generated catalog-info.yaml for " + bitbucketRepoName + " at " + outputFile.getAbsolutePath());
+                    System.out.println("Generated catalog-info.yaml for " + bitbucketRepoName +
+                            " at " + outputFile.getAbsolutePath());
                 } catch (IOException e) {
                     System.err.println("Error writing catalog-info.yaml for repo: " + bitbucketRepoName);
                 }
 
-                // Mark this repo URL as processed
+                // Mark this repository URL as processed
                 processedRepoUrls.add(bitbucketRepoUrl);
             }
         }
     }
 
     /**
-     * Calls Bitbucket API to retrieve the Jenkinsfile from the repository.
-     * Adjust the API endpoint as necessary.
+     * Fetches the Jenkinsfile content using the Bitbucket API.
+     * Adjust the API URL construction and error handling as needed.
      *
      * @param repoUrl The Bitbucket repository URL.
      * @return The content of the Jenkinsfile or null if not found.
@@ -125,7 +126,8 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
         try {
             // For example, assume the Jenkinsfile is available at:
             // https://bitbucketp.org/rest/api/1.0/projects/{projectKey}/repos/{repoSlug}/raw/Jenkinsfile?at=refs/heads/main
-            // Here we simply append a known path to the repository URL. In a real scenario, you might need to extract projectKey and repoSlug.
+            // This example assumes that appending "/raw/branch/main/Jenkinsfile" to the repo URL will return the Jenkinsfile.
+            // Adjust this to match your Bitbucket configuration.
             String jenkinsApiUrl = repoUrl + "/raw/branch/main/Jenkinsfile";
             ResponseEntity<String> response = restTemplate().getForEntity(jenkinsApiUrl, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -138,16 +140,14 @@ public class CatalogInfoGeneratorApplication implements CommandLineRunner {
     }
 
     /**
-     * Generates the catalog-info.yaml content with the provided Bitbucket repository name.
-     *
-     * You might want to adjust or enhance this template, for example by dynamically extracting the project name.
+     * Generates the content of the catalog-info.yaml file using the Bitbucket repository name.
      *
      * @param bitbucketRepoName The name of the Bitbucket repository.
-     * @return The content of catalog-info.yaml as a String.
+     * @return The catalog-info.yaml content as a String.
      */
     private String generateCatalogYaml(String bitbucketRepoName) {
-        // Replace <projectname> with an appropriate value if available.
-        String projectName = "PROJECT"; // Placeholder: update as necessary.
+        // Replace <projectname> with an appropriate value (could be a property or derived from the repo URL).
+        String projectName = "PROJECT"; // Placeholder—update as needed.
         return "apiVersion: backstage.io/v1alpha1\n" +
                "kind: Component\n" +
                "metadata:\n" +
