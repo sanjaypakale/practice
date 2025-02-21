@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Stepper, Step, StepLabel, Button, Box, MenuItem, TextField } from '@mui/material';
+import { Stepper, Step, StepLabel, Button, Box, MenuItem, TextField, Typography } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 
-// A reusable TextField component that automatically registers and handles validation.
-// It displays an outlined info icon when there's an error.
+// A reusable TextField component that registers the input and displays a label using Typography.
+// It shows an outlined info icon along with the error message when there's a validation error.
 const FormTextField = ({ name, label, select = false, options = [], rules = {}, ...rest }) => {
   const {
     register,
@@ -14,38 +14,46 @@ const FormTextField = ({ name, label, select = false, options = [], rules = {}, 
   const errorMessage = errors[name]?.message;
 
   return (
-    <TextField
-      label={label}
-      {...register(name, rules)}
-      select={select}
-      fullWidth
-      error={!!errors[name]}
-      helperText={
-        errorMessage ? (
-          <span style={{ display: 'flex', alignItems: 'center' }}>
-            <InfoOutlinedIcon fontSize="small" style={{ marginRight: 4 }} />
-            {errorMessage}
-          </span>
-        ) : ''
-      }
-      margin="normal"
-      {...rest}
-    >
-      {select &&
-        options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        ))}
-    </TextField>
+    <Box my={2}>
+      <Typography variant="subtitle1" gutterBottom>
+        {label}
+      </Typography>
+      <TextField
+        {...register(name, rules)}
+        select={select}
+        fullWidth
+        variant="outlined"
+        error={!!errors[name]}
+        helperText={
+          errorMessage ? (
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <InfoOutlinedIcon fontSize="small" style={{ marginRight: 4 }} />
+              {errorMessage}
+            </span>
+          ) : ''
+        }
+        {...rest}
+      >
+        {select &&
+          options.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+      </TextField>
+    </Box>
   );
 };
 
 const GettingStarted = () => {
   return (
     <Box>
-      <h2>Welcome to DevOps Onboarding</h2>
-      <p>Please follow the steps to complete your onboarding.</p>
+      <Typography variant="h5" gutterBottom>
+        Welcome to DevOps Onboarding
+      </Typography>
+      <Typography variant="body1">
+        Please follow the steps to complete your onboarding.
+      </Typography>
     </Box>
   );
 };
@@ -100,7 +108,9 @@ const Review = () => {
 
   return (
     <Box>
-      <h3>Review Your Data</h3>
+      <Typography variant="h6" gutterBottom>
+        Review Your Data
+      </Typography>
       <pre>{JSON.stringify(values, null, 2)}</pre>
     </Box>
   );
