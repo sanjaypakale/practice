@@ -1,16 +1,47 @@
 import React, { useState } from 'react';
 import { Stepper, Step, StepLabel, Button, Box, MenuItem, TextField } from '@mui/material';
-import { useForm, FormProvider, useFormContext, Controller } from 'react-hook-form';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 
-const steps = [
-  'Getting Started',
-  'Repository Picker',
-  'Build Details',
-  'Review',
-];
+// A reusable TextField component that automatically registers and handles validation.
+// It displays an outlined info icon when there's an error.
+const FormTextField = ({ name, label, select = false, options = [], rules = {}, ...rest }) => {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+
+  const errorMessage = errors[name]?.message;
+
+  return (
+    <TextField
+      label={label}
+      {...register(name, rules)}
+      select={select}
+      fullWidth
+      error={!!errors[name]}
+      helperText={
+        errorMessage ? (
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <InfoOutlinedIcon fontSize="small" style={{ marginRight: 4 }} />
+            {errorMessage}
+          </span>
+        ) : ''
+      }
+      margin="normal"
+      {...rest}
+    >
+      {select &&
+        options.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+    </TextField>
+  );
+};
 
 const GettingStarted = () => {
-  // Placeholder for getting started content
   return (
     <Box>
       <h2>Welcome to DevOps Onboarding</h2>
@@ -20,84 +51,44 @@ const GettingStarted = () => {
 };
 
 const RepositoryPicker = () => {
-  // Use useFormContext() to connect with the parent form state
-  const { control, formState: { errors } } = useFormContext();
-
   return (
     <Box>
-      <Controller
+      <FormTextField
         name="bitbucketProject"
-        control={control}
+        label="Bitbucket Project"
+        select
         rules={{ required: 'Project name is required' }}
-        render={({ field }) => (
-          <TextField 
-            {...field} 
-            select 
-            label="Bitbucket Project" 
-            fullWidth 
-            error={!!errors.bitbucketProject} 
-            helperText={errors.bitbucketProject?.message}
-          >
-            <MenuItem value="Project1">Project1</MenuItem>
-            <MenuItem value="Project2">Project2</MenuItem>
-          </TextField>
-        )}
+        options={[
+          { value: 'Project1', label: 'Project1' },
+          { value: 'Project2', label: 'Project2' },
+        ]}
       />
-      <Controller
+      <FormTextField
         name="bitbucketRepository"
-        control={control}
+        label="Bitbucket Repository"
+        select
         rules={{ required: 'Repository name is required' }}
-        render={({ field }) => (
-          <TextField 
-            {...field} 
-            select 
-            label="Bitbucket Repository" 
-            fullWidth 
-            error={!!errors.bitbucketRepository} 
-            helperText={errors.bitbucketRepository?.message}
-          >
-            <MenuItem value="Repo1">Repo1</MenuItem>
-            <MenuItem value="Repo2">Repo2</MenuItem>
-          </TextField>
-        )}
+        options={[
+          { value: 'Repo1', label: 'Repo1' },
+          { value: 'Repo2', label: 'Repo2' },
+        ]}
       />
     </Box>
   );
 };
 
 const BuildDetails = () => {
-  // Use useFormContext() to share the parent form state
-  const { control, formState: { errors } } = useFormContext();
-
   return (
     <Box>
-      <Controller
+      <FormTextField
         name="buildCommand"
-        control={control}
+        label="Build Command"
         rules={{ required: 'Build command is required' }}
-        render={({ field }) => (
-          <TextField 
-            {...field} 
-            label="Build Command" 
-            fullWidth 
-            error={!!errors.buildCommand} 
-            helperText={errors.buildCommand?.message} 
-          />
-        )}
       />
-      <Controller
+      <FormTextField
         name="agentName"
-        control={control}
+        label="Agent Name"
         rules={{ required: 'Agent name is required' }}
-        render={({ field }) => (
-          <TextField 
-            {...field} 
-            label="Agent Name" 
-            fullWidth 
-            error={!!errors.agentName} 
-            helperText={errors.agentName?.message} 
-          />
-        )}
       />
     </Box>
   );
@@ -115,18 +106,24 @@ const Review = () => {
   );
 };
 
+const steps = [
+  'Getting Started',
+  'Repository Picker',
+  'Build Details',
+  'Review',
+];
+
 const DevOpsOnboarding = () => {
   const [activeStep, setActiveStep] = useState(0);
   const methods = useForm({ mode: 'onChange' });
 
-  // Final form submission function
+  // Final form submission handler
   const onSubmit = (data) => {
     console.log('Form Submitted:', data);
-    // Here you can handle the form data further (e.g., send to an API)
+    // Further processing, e.g., API calls, can go here
   };
 
-  // Handle Next button click: validate current step and move forward.
-  // If on the final step, trigger form submission.
+  // Handle Next button click: validate current step; if final step, submit form.
   const handleNext = async () => {
     if (activeStep === steps.length - 1) {
       methods.handleSubmit(onSubmit)();
@@ -167,9 +164,7 @@ const DevOpsOnboarding = () => {
             </Step>
           ))}
         </Stepper>
-        <Box sx={{ mt: 3 }}>
-          {getStepContent(activeStep)}
-        </Box>
+        <Box sx={{ mt: 3 }}>{getStepContent(activeStep)}</Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
           <Button disabled={activeStep === 0} onClick={handleBack}>
             Back
