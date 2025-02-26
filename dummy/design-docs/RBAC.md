@@ -16,7 +16,7 @@ Since **Backstage will be integrated with the Enterprise Access Request (EAR) sy
 |-----------|---------------|
 | **No Access** | Developers have no access by default. |
 | **Requestable Access** | Developers can see and request access to apps based on EAR. |
-| **Approved Access** | Once AOs approve, EAR grants access, and Backstage updates the status. |
+| **Approved Access** | Once AOs approve, Backstage grants access and logs the action. |
 | **Time-Limited Access** | Option to grant access for a fixed period (e.g., 7, 30 days). |
 
 ---
@@ -28,16 +28,14 @@ Since **Backstage will be integrated with the Enterprise Access Request (EAR) sy
 
 2. **Developer Requests Access**
    - Selects an app and submits a request with a **justification**.
-   - Backstage sends the request to **EAR for approval processing**.
+   - Backstage sends a **notification to the AO** for approval.
 
-3. **AO Approval via EAR**
-   - AO receives **notification (Email, Teams, Backstage)**.
-   - AO approves/rejects the request **inside EAR**.
-   - EAR updates access status and syncs with Backstage.
+3. **AO Approval via Backstage**
+   - AO receives **notification (Email, Teams, Backstage UI)**.
+   - AO approves or rejects the request **inside Backstage**.
 
-4. **Access Granted & Logged**
-   - If approved, EAR assigns access and logs the request.
-   - Backstage updates the **UI with approval status**.
+4. **Backstage Assigns Access & Logs Audit**
+   - If approved, Backstage assigns access and logs the action.
    - If rejected, the developer receives a **notification**.
 
 ---
@@ -46,9 +44,10 @@ Since **Backstage will be integrated with the Enterprise Access Request (EAR) sy
 ### **Data Flow**
 ```plaintext
 Backstage → Fetch Apps & AOs → EAR System
-Backstage → Send Access Request → EAR System
-EAR System → Approval/Rejection → Backstage Updates
-EAR System → Assign Access & Log Audit
+Developer → Request Access → Backstage
+Backstage → Send Notification to AO → Email/Teams
+AO → Approve/Revoke Access → Backstage
+Backstage → Assign Access & Log Audit → Database
 ```
 
 ### **Integration Points**
@@ -56,9 +55,10 @@ EAR System → Assign Access & Log Audit
 |------------|------------------|--------------------------|
 | **App Registry** | EAR System | REST API/GraphQL |
 | **AO Mapping** | EAR System | Sync via API |
-| **Request Submission** | Backstage → EAR | REST API |
-| **Approval Processing** | EAR → AO | EAR UI / Notification |
-| **Access Status Update** | EAR → Backstage | Webhook / Polling |
+| **Request Submission** | Backstage | Internal Workflow |
+| **Approval Processing** | Backstage UI | AO Action |
+| **Access Assignment** | Backstage | Database Update |
+| **Audit Logging** | Backstage | PostgreSQL / Logging System |
 
 ---
 
@@ -80,9 +80,9 @@ EAR System → Assign Access & Log Audit
 
 ## **5. Enhancements**
 1. **Auto-Revoke Expired Access**  
-   - EAR can enforce automatic revocation after expiry.  
+   - Backstage can enforce automatic revocation after expiry.  
 2. **Audit Logging**  
-   - Store approval logs in EAR and expose them in Backstage.  
+   - Store approval logs in Backstage and expose them via UI.  
 3. **RBAC Enforcement**  
    - Developers only see **apps they are allowed to request** based on EAR policies.  
 4. **ChatOps Integration**  
@@ -96,3 +96,4 @@ EAR System → Assign Access & Log Audit
 ✅ **Secure & Compliant** – Full audit trail and role-based access control.
 
 Would you like a **detailed API design for Backstage-EAR integration**? 🚀
+
