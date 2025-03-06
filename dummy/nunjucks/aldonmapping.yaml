@@ -1,0 +1,6 @@
+# Source=Target
+{% for task in tasks %}
+- task: {{ task.type }}
+  source: {{ task.source }}
+  target: {{ task.target }}
+{% endfor %}
