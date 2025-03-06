@@ -1,0 +1,8 @@
+# Source=Target
+copy:
+  {% for item in files %}
+  {{ item.type }}{{ loop.index }}:
+    source: {{ item.source }}
+    target: {{ item.target }}
+    common: {{ item.common | lower }}
+  {% endfor %}
