@@ -3,8 +3,7 @@ actor User
 participant "Backstage UI" as UI
 participant "Backstage Backend" as Backend
 participant "Auth Service" as Auth
-participant "App Service" as AppService
-participant "Module Service" as ModuleService
+participant "DDP Microservice" as DDP
 
 == User Login ==
 User -> UI : Login
@@ -15,17 +14,17 @@ Auth --> UI : Token / User Info
 User -> UI : Click 'Create Pipeline'
 
 == Fetch AppCode ==
-UI -> Backend : Get AppCode for User
-Backend -> Auth : Get User Info (from token)
-Backend -> AppService : Fetch AppCodes for User
-AppService --> Backend : AppCodes List
-Backend --> UI : AppCodes List
+UI -> Backend : Get AppCode
+Backend -> Auth : Get User Info from Token
+Backend -> DDP : Fetch AppCode for User
+DDP --> Backend : AppCode List
+Backend --> UI : AppCode List
 
-== Fetch Modules for Selected AppCode ==
+== Fetch Modules ==
 User -> UI : Select AppCode
 UI -> Backend : Get Modules for AppCode
-Backend -> ModuleService : Fetch Modules
-ModuleService --> Backend : Modules List
+Backend -> DDP : Fetch Modules for AppCode
+DDP --> Backend : Modules List
 Backend --> UI : Modules List
 
 @enduml
