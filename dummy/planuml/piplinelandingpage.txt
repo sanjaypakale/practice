@@ -1,0 +1,31 @@
+@startuml
+actor User
+participant "Backstage UI" as UI
+participant "Backstage Backend" as Backend
+participant "Auth Service" as Auth
+participant "App Service" as AppService
+participant "Module Service" as ModuleService
+
+== User Login ==
+User -> UI : Login
+UI -> Auth : Authenticate User
+Auth --> UI : Token / User Info
+
+== Click 'Create Pipeline' ==
+User -> UI : Click 'Create Pipeline'
+
+== Fetch AppCode ==
+UI -> Backend : Get AppCode for User
+Backend -> Auth : Get User Info (from token)
+Backend -> AppService : Fetch AppCodes for User
+AppService --> Backend : AppCodes List
+Backend --> UI : AppCodes List
+
+== Fetch Modules for Selected AppCode ==
+User -> UI : Select AppCode
+UI -> Backend : Get Modules for AppCode
+Backend -> ModuleService : Fetch Modules
+ModuleService --> Backend : Modules List
+Backend --> UI : Modules List
+
+@enduml
