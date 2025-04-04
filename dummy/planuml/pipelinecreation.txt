@@ -1,4 +1,5 @@
 @startuml
+autonumber
 actor User
 participant "Backstage UI" as UI
 participant "Backstage Backend" as Backend
@@ -29,26 +30,19 @@ Backend --> UI : Repository List
 
 == Submit DevOps Onboarding ==
 User -> UI : Click Submit
+
 UI -> Backend : /createpropertiesfiles
 note right of Backend : Sends DevopsOnboarding\nObject in request
-Backend -> DDP : Create Properties Files
-DDP --> Backend : 200 OK
-Backend --> UI : Success
+Backend --> UI : 200 OK
 
 UI -> Backend : /artifactorysetup
-Backend -> DDP : Create Artifactory Setup
-DDP --> Backend : 200 OK
-Backend --> UI : Success
+Backend --> UI : 200 OK
 
 UI -> Backend : /sonarsetup
-Backend -> DDP : Create Sonar Setup
-DDP --> Backend : 200 OK
-Backend --> UI : Success
+Backend --> UI : 200 OK
 
 UI -> Backend : /jenkinssetup
-Backend -> DDP : Create Jenkins Jobs
-DDP --> Backend : 200 OK
-Backend --> UI : Success
+Backend --> UI : 200 OK
 
 == Save Metadata ==
 UI -> Backend : /v1/onboarding/save
