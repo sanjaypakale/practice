@@ -1,5 +1,4 @@
 @startuml
-autonumber
 actor User
 participant "Backstage UI" as UI
 participant "Backstage Backend" as Backend
