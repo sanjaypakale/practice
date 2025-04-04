@@ -1,0 +1,63 @@
+@startuml
+autonumber
+actor User
+participant "Backstage UI" as UI
+participant "Backstage Backend" as Backend
+participant "Auth Service" as Auth
+participant "DDP Microservice" as DDP
+
+== Login ==
+User -> UI : Login
+UI -> Auth : Authenticate User
+Auth --> UI : Token / User Info
+
+== Navigation ==
+User -> UI : Click on 'Pipeline' (Side Nav)
+User -> UI : Click on 'Create Pipeline'
+
+== Fetch Bitbucket Project Keys ==
+UI -> Backend : /getbitbucketappcodemapping/<appcode>
+Backend -> DDP : Get Bitbucket Project Keys
+DDP --> Backend : Project Key List
+Backend --> UI : Project Key List
+
+== Fetch Repositories ==
+User -> UI : Select Project Key
+UI -> Backend : /getBitbucketRepositories/<projectKey>
+Backend -> DDP : Get Repositories for Project Key
+DDP --> Backend : Repository List
+Backend --> UI : Repository List
+
+== Submit DevOps Onboarding ==
+User -> UI : Click Submit
+UI -> Backend : /createpropertiesfiles
+note right of Backend : Sends DevopsOnboarding\nObject in request
+Backend -> DDP : Create Properties Files
+DDP --> Backend : 200 OK
+Backend --> UI : Success
+
+UI -> Backend : /artifactorysetup
+Backend -> DDP : Create Artifactory Setup
+DDP --> Backend : 200 OK
+Backend --> UI : Success
+
+UI -> Backend : /sonarsetup
+Backend -> DDP : Create Sonar Setup
+DDP --> Backend : 200 OK
+Backend --> UI : Success
+
+UI -> Backend : /jenkinssetup
+Backend -> DDP : Create Jenkins Jobs
+DDP --> Backend : 200 OK
+Backend --> UI : Success
+
+== Save Metadata ==
+UI -> Backend : /v1/onboarding/save
+Backend -> DDP : Save DevOps Onboarding Metadata
+DDP --> Backend : 200 OK
+Backend --> UI : Success
+
+== Redirect ==
+UI -> UI : Redirect to Onboarding Dashboard
+
+@enduml
