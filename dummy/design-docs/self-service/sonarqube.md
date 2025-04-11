@@ -50,11 +50,46 @@ This document focuses on automating access requests for **SonarQube**. Future en
 ### 🧱 High-Level Architecture
 
 ```plaintext
-[User] --> [Backstage Plugin UI] --> [Backstage Backend Plugin]
-                             |--> [EAR API Integration] --> [L4 Details]
-                             |--> [Email Notification Service]
-                             |--> [Access Provisioning Service]
-                                          |--> [SonarQube API]
+@startuml
+start
+
+:DevOps Engineer / Developer logs into Backstage;
+:Navigate to 'Self-Service' -> 'SonarQube';
+
+:Select App Code;
+:Select SonarQube Project;
+:Add LAN ID(s);
+:Submit Request;
+
+:Backstage Plugin sends Request to Backend;
+:Backend calls EAR API to fetch L4 Approver;
+:Store Request in DB;
+:Send Email Notification to L4 and Requestor;
+
+stop
+
+== Approval Flow ==
+
+start
+
+:L4 / Delegate L4 logs into Backstage;
+:Navigate to 'My Approvals';
+:Review Pending Request;
+
+if (Approve?) then (Yes)
+    :Backstage Plugin calls Backend with Request ID & APPROVE;
+    :Backend calls SonarQube API to grant access;
+    :Update request status to 'APPROVED';
+    :Send Approval Notification to Requestor;
+else (No)
+    :Backstage Plugin calls Backend with Request ID & REJECT;
+    :Update request status to 'REJECTED';
+    :Send Rejection Notification to Requestor;
+endif
+
+stop
+@enduml
+
 ```
 
 ---
