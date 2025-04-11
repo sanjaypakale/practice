@@ -1,34 +1,28 @@
 @startuml
-|DevOps Engineer / Developer|
-start
-:Login to Backstage;
-:Navigate to Self-Service -> SonarQube;
-:Select App Code;
-:Select SonarQube Project;
-:Add LAN ID(s);
-:Submit Request;
+actor DevOpsEngineer as Dev
+actor L4Approver as L4
+participant Backstage_UI as UI
+participant Backstage_Backend as Backend
+participant SonarQube
 
-|Backstage Plugin|
-:Send request to backend;
-:Call EAR API to get L4 approver;
-:Store request in DB;
-:Send email notification to L4 and Requestor;
+Dev -> UI : Login
+Dev -> UI : Select App Code,\nSelect SonarQube Projects,\nEnter LAN ID
+Dev -> UI : Submit Request
+UI -> Backend : Store request with status 'Pending'
+Backend -> L4 : Send Notification
+Backend -> Dev : Send Notification (Request Submitted)
 
-|L4 / Delegate L4|
-:Login to Backstage;
-:Navigate to My Approvals;
-:View Pending Request;
-:Approve or Reject Request;
+L4 -> UI : Login
+L4 -> UI : View Pending Requests
+L4 -> UI : Approve / Reject
 
-|Backstage Backend|
-if (Approved?) then (yes)
-  :Call SonarQube API to add LAN ID(s) to group;
-  :Update request status to APPROVED;
-  :Send approval notification to Requestor;
-else
-  :Update request status to REJECTED;
-  :Send rejection notification to Requestor;
-endif
-
-stop
+alt Approved
+    UI -> Backend : Process Approval (Request ID)
+    Backend -> SonarQube : Add user to respective group
+    SonarQube --> Backend : Success response
+    Backend -> Dev : Send Notification (Approved)
+else Rejected
+    UI -> Backend : Process Rejection (Request ID)
+    Backend -> Dev : Send Notification (Rejected)
+end
 @enduml
