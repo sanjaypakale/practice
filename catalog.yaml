@@ -16,7 +16,7 @@ metadata:
 spec:
     type: service
     lifecycle: production
-    owner: user:sanjaypakale
+    owner: user:test
     system: project-x
     targets:
       - sample.json
