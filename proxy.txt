@@ -1,0 +1,1 @@
+curl -v -H "Proxy-Authorization: Basic $(echo -n 'tmp3vd:test@0007' | base64)" -x http://proxy.company.com:8080 https://www.google.com
