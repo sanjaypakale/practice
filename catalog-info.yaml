@@ -4,6 +4,7 @@ metadata:
   name: practice
   annotations:
     github.com/project-slug: sanjaypakale/practice
+    backstage.io/linguist: https://github.com/sanjaypakale/my-developerportal-master
 spec:
   type: website
   lifecycle: unknown
