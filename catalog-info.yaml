@@ -5,7 +5,6 @@ metadata:
   annotations:
     github.com/project-slug: sanjaypakale/practice
 spec:
-  type: other
+  type: website
   lifecycle: unknown
   owner: guests
-  system: website
