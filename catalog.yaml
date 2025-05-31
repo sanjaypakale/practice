@@ -17,7 +17,7 @@ spec:
     type: service
     lifecycle: production
     owner: user:test
-    system: project-x
+    system: dvx
     targets:
       - sample.json
 
