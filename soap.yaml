@@ -1,0 +1,69 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: sample-soap-api
+  description: Sample SOAP web service for demonstration purposes
+  tags:
+    - soap
+    - wsdl
+    - legacy
+spec:
+  type: openapi
+  lifecycle: production
+  owner: team-a
+  definition:
+    $text: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                   xmlns:tns="http://example.com/sample"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   targetNamespace="http://example.com/sample">
+        <types>
+          <xsd:schema targetNamespace="http://example.com/sample">
+            <xsd:element name="sayHello">
+              <xsd:complexType>
+                <xsd:sequence>
+                  <xsd:element name="name" type="xsd:string"/>
+                </xsd:sequence>
+              </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="sayHelloResponse">
+              <xsd:complexType>
+                <xsd:sequence>
+                  <xsd:element name="greeting" type="xsd:string"/>
+                </xsd:sequence>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:schema>
+        </types>
+        <message name="sayHelloRequest">
+          <part name="parameters" element="tns:sayHello"/>
+        </message>
+        <message name="sayHelloResponse">
+          <part name="parameters" element="tns:sayHelloResponse"/>
+        </message>
+        <portType name="SamplePortType">
+          <operation name="sayHello">
+            <input message="tns:sayHelloRequest"/>
+            <output message="tns:sayHelloResponse"/>
+          </operation>
+        </portType>
+        <binding name="SampleBinding" type="tns:SamplePortType">
+          <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+          <operation name="sayHello">
+            <soap:operation soapAction="sayHello"/>
+            <input>
+              <soap:body use="literal"/>
+            </input>
+            <output>
+              <soap:body use="literal"/>
+            </output>
+          </operation>
+        </binding>
+        <service name="SampleService">
+          <port name="SamplePort" binding="tns:SampleBinding">
+            <soap:address location="http://example.com/sampleService"/>
+          </port>
+        </service>
+      </definitions>
